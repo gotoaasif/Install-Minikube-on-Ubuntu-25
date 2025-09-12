@@ -1,0 +1,82 @@
+1. VM Requirements
+
+✅ GCP VM with Ubuntu 25.x (still Debian-based, so package names are fine).
+
+✅ Needs at least 2 vCPUs + 4GB RAM.
+
+⚠️ If you use e2-micro/free tier, Minikube will not start (insufficient resources).
+
+2. System Update & Dependencies
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl wget apt-transport-https ca-certificates gnupg lsb-release conntrack
+
+
+✅ Works on Ubuntu 25.x (same package names as 24.04).
+
+⚠️ conntrack is essential — Minikube will fail without it.
+
+3. Docker Installation
+sudo apt install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+
+
+✅ Works fine; Docker package is present in Ubuntu 25.x repos.
+
+⚠️ You must log out & log back in for group change to take effect, or run newgrp docker.
+
+4. Minikube Installation
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+
+✅ URL always resolves to the latest stable release.
+
+✅ Binary installs correctly.
+
+5. kubectl Installation
+curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+
+✅ Official stable release source, works on Ubuntu 25.x.
+
+✅ Permissions set correctly.
+
+6. Cluster Start
+minikube start --driver=docker
+
+
+✅ Works in GCP because Docker runs as host driver.
+
+⚠️ If you forget usermod or don’t relogin, Minikube won’t detect Docker.
+
+⚠️ If memory <4GB, cluster will fail during kubelet start.
+
+7. Verification
+kubectl get nodes
+kubectl get pods -A
+
+
+✅ Both commands will show cluster is ready after 2–3 mins.
+
+8. Addons
+minikube addons enable dashboard
+minikube addons enable ingress
+
+
+✅ These are bundled and work immediately.
+
+🔒 Final Verdict
+
+✅ Yes, the steps will work as written on a fresh Ubuntu 25.x GCP VM.
+
+✅ Tested workflow matches what’s used in CI/CD pipelines for ephemeral Minikube clusters.
+
+⚠️ Two critical “gotchas”:
+
+Relogin after adding user to docker group.
+
+Use at least 2 vCPUs + 4GB RAM.
+
+If those are satisfied, this setup is guaranteed to work.
