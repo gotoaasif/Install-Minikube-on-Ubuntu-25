@@ -1,1 +1,55 @@
+# Important:
+
+# Linux kernel must be 
+# Kernel level: In modern distros (Ubuntu 22.04+, Debian 12+, RHEL 9+),
+
+# Disable swap on each vm where k8s cluster is required to be installed
+
+sudo swapoff -a         
+
+
+
+# Can a kubernetes master node and worker node be installed on the same linux vm?
+<!-- Question:
+Answer:
+On a single Linux VM, both master and worker roles can coexist:
+
+The control plane runs normally.
+
+The node also registers itself as a worker.
+
+This is what minikube start, kind create cluster, or kubeadm init + kubectl taint nodes --all node-role.kubernetes.io/control-plane- do.
+
+Example with kubeadm:
+
+# Initialize control plane
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+# Configure kubectl
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# Allow master to run workloads
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+
+
+Now your master node is also a worker, so pods can schedule there. -->
+
+# Enable IPv4 packet forwarding
+# To manually enable IPv4 packet forwarding:
+
+# sysctl params required by setup, params persist across reboots
+
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.ipv4.ip_forward = 1
+EOF
+
+# Apply sysctl params without reboot
+sudo sysctl --system
+Verify that net.ipv4.ip_forward is set to 1 with:
+
+sysctl net.ipv4.ip_forward
+
+
 
