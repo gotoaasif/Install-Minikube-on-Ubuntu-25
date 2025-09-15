@@ -84,5 +84,12 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 # Intialize control plane nodes
 
+sudo kubeadm init --pod-network-cidr=192.168.1.0/24 --apiserver-advertise-address=192.168.1.2
 
+You should see the message ... Your Kubernetes control-plane has initialized successfully!
 
+# To start using your cluster, you need to run the foll as * a REGULAR user*
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
