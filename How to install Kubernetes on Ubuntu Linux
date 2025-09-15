@@ -51,5 +51,38 @@ Verify that net.ipv4.ip_forward is set to 1 with:
 
 sysctl net.ipv4.ip_forward
 
+# Install containerd
+
+sudo apt-get update
+sudo apt-get install containerd
+
+# Verify the containerd installation succeeded
+
+ubuntu@devops-02:~$ containerd --version
+containerd github.com/containerd/containerd 1.7.27
+
+
+sudo containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/' | sed 's/sandbox_image = "registry.k8s.io\/pause:3.6"/sandbox_image = "registry.k8s.io\/pause:3.9"/' | sudo tee /etc/containerd/config.toml
+
+# Restart containerd and check its status
+
+ubuntu@devops-02:~$ sudo systemctl restart containerd
+ubuntu@devops-02:~$ sudo systemctl status containerd
+
+# Install kubeadm, kubelet and kubectl
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+# Intialize control plane nodes
+
 
 
