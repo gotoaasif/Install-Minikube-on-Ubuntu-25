@@ -94,3 +94,74 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+# Lastly we need to install the CNI plugin
+# A CNI plugin is required to implement the Kubernetes network model. This allows pods to communicate with each other and with other network endpoints.
+# 1. What is a CNI?
+
+# CNI = Container Network Interface.
+# It’s a specification (from the CNCF) plus a set of plugins that handle networking for containers.
+
+# Kubernetes itself doesn’t do container networking.
+
+# Instead, it relies on CNI plugins to implement the “Kubernetes network model.”
+
+# 👉 Think of Kubernetes as saying:
+# "Every Pod must get its own IP, and all Pods should be able to talk to each other without NAT. Also, Services need load-balancing across Pods."
+# But Kubernetes doesn’t say how — that’s where CNIs come in.
+
+# 🔹 2. Why is it important?
+
+# Without a CNI:
+
+# Pods can be created, but they’ll be stuck in ContainerCreating because there’s no networking.
+
+# Kubelet calls into the CNI binary (like Flannel, Calico, Cilium) to set up veth pairs, bridges, routing, and IPAM.
+
+# CNIs also often handle NetworkPolicies, encapsulation/overlay networks, and sometimes encryption.
+
+# So basically:
+# ➡️ No CNI → no working cluster network.
+# ➡️ Installing a CNI is mandatory for a functional multi-node Kubernetes cluster.
+# 3. Flannel vs Calico
+
+# Two of the most popular CNIs you’ll encounter:
+
+# 🟦 Flannel
+
+# Simple, lightweight CNI.
+
+# Focus: Pod-to-Pod connectivity only (using VXLAN or host-gw).
+
+# Doesn’t support Kubernetes NetworkPolicies.
+
+# Great for small labs, dev/test clusters, or when you just want networking to work.
+
+# 🟧 Calico
+
+# More feature-rich and enterprise-grade.
+
+# Offers:
+
+# Pod-to-Pod connectivity (BGP, VXLAN, IPIP, or native routing)
+
+# Kubernetes NetworkPolicies (fine-grained security between Pods)
+
+# Encryption (WireGuard)
+
+# Scalability to very large clusters.
+
+# Slightly more complex to configure, but widely used in production.
+
+# 🔹 4. Which should you choose?
+
+# For learning / simple clusters:
+# 👉 Flannel is easier, one YAML apply, minimal config.
+
+# For production / enterprise:
+# 👉 Calico is better because you’ll want NetworkPolicies (for zero-trust, compliance, security) and flexibility in routing modes.
+
+# Performance note:
+
+# Calico in BGP mode (no encapsulation) can be very efficient.
+
+# Flannel always uses an overlay unless you tweak it.
